@@ -129,7 +129,16 @@ async function uploadFile(file) {
 
   try {
     const res = await fetch('/api/upload', { method: 'POST', body: formData });
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      const text = await res.text().catch(() => `HTTP ${res.status}`);
+      showToast(`❌ Erreur serveur: ${res.status}`, 'error');
+      setStatus('error', 'Erreur serveur');
+      logLine(`Erreur serveur (${res.status}): ${text.slice(0, 200)}`, 'error');
+      return;
+    }
 
     if (data.error) {
       showToast(`❌ ${data.error}`, 'error');
